@@ -1,0 +1,114 @@
+# ============================================================
+#  alert_rules.yml — Prometheus Alerting Rules
+#  Place at: /etc/prometheus/alert_rules.yml
+#
+#  These fire when thresholds are breached for 5 minutes.
+#  Tune the 'for' duration and threshold values to your needs.
+# ============================================================
+
+groups:
+
+  # ── CPU Alerts ───────────────────────────────────────────
+  - name: cpu_alerts
+    rules:
+
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by(instance) (
+            rate(node_cpu_seconds_total{mode="idle"}[5m])
+          ) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 80%) on {{ $labels.instance }} for more than 5 minutes."
+
+      - alert: CriticalCPUUsage
+        expr: |
+          100 - (avg by(instance) (
+            rate(node_cpu_seconds_total{mode="idle"}[5m])
+          ) * 100) > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% on {{ $labels.instance }}. Immediate action required."
+
+  # ── Memory Alerts ────────────────────────────────────────
+  - name: memory_alerts
+    rules:
+
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}% on {{ $labels.instance }}."
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}% on {{ $labels.instance }}."
+
+  # ── Disk Alerts ──────────────────────────────────────────
+  - name: disk_alerts
+    rules:
+
+      - alert: DiskSpaceWarning
+        expr: |
+          (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} /
+                node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 75
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space warning on {{ $labels.instance }}"
+          description: "Disk {{ $labels.mountpoint }} is {{ $value | printf \"%.1f\" }}% full on {{ $labels.instance }}."
+
+      - alert: DiskSpaceCritical
+        expr: |
+          (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} /
+                node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL disk space on {{ $labels.instance }}"
+          description: "Disk {{ $labels.mountpoint }} is {{ $value | printf \"%.1f\" }}% full. Free up space immediately."
+
+  # ── Instance Down Alert ──────────────────────────────────
+  - name: availability_alerts
+    rules:
+
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is DOWN"
+          description: "{{ $labels.instance }} (job: {{ $labels.job }}) has been unreachable for more than 1 minute."
+
+  # ── Network Alerts ───────────────────────────────────────
+  - name: network_alerts
+    rules:
+
+      - alert: HighNetworkReceive
+        expr: |
+          rate(node_network_receive_bytes_total{device!~"lo"}[5m]) > 100 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High inbound network traffic on {{ $labels.instance }}"
+          description: "Network receive rate is {{ $value | humanize }}B/s on {{ $labels.device }}."
