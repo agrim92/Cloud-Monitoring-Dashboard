@@ -7,8 +7,6 @@
 #    Open Prometheus at http://localhost:9090
 # ============================================================
 
-version: "3.8"
-
 networks:
   monitoring:
     driver: bridge
@@ -43,14 +41,6 @@ services:
     image: prom/node-exporter:v1.7.0
     container_name: node-exporter
     restart: unless-stopped
-    command:
-      - "--path.rootfs=/host"
-      - "--collector.systemd"
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/host:ro,rslave
-    pid: host
     ports:
       - "9100:9100"
     networks:
