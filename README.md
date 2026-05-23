@@ -1,8 +1,9 @@
 # Cloud Infrastructure Monitoring Dashboard
 
-A production-grade observability stack built with **Prometheus**, **Grafana**, and **Node Exporter** — deployed on AWS EC2. Monitors CPU, memory, disk, and network metrics in real time with automated threshold-based alerting.
+A production-grade observability stack built with **Prometheus**, **Grafana**, and **Node Exporter** and deployed on AWS EC2. Monitors CPU, memory, disk, and network metrics in real time with automated threshold-based alerting.
 
-> Built as part of a hands-on SRE portfolio to demonstrate cloud monitoring and infrastructure observability skills.
+> Built to learn and gain familiarity with the tech stack used
+> used ai for writeups and yt tutorials for learning and building. 
 
 ---
 
